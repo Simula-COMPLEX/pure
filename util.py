@@ -9,3 +9,4 @@ import os,sys,glob,ntpath
 import pandas as pd
 ROOT_DIR = os.path.abspath("ssd_keras")
 sys.path.append(ROOT_DIR)  # To find local version of the library
+print('a')
