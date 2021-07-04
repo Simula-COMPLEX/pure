@@ -5,14 +5,29 @@ Created on Sun Jul  4 19:56:47 2021
 
 @author: ozgur
 """
-import os,sys,glob,ntpath
-import pandas as pd
+import os
+import sys
 from google_drive_downloader import GoogleDriveDownloader as gdd
+
+from keras.optimizers import Adam
+
+from keras import backend as K
+
+from models.keras_ssd300 import ssd_300 # pylint: disable=import-error
+from keras_loss_function.keras_ssd_loss import SSDLoss # pylint: disable=import-error
+
 ROOT_DIR = os.path.abspath("ssd_keras")
 sys.path.append(ROOT_DIR)  # To find local version of the library
 
 WEIGHT_PATH = 'tmp_model/VGG_VOC0712_SSD_300x300_iter_120000.h5'
 
+classes = ['background', 'aeroplane', 'bicycle', 'bird', 'boat',
+           'bottle', 'bus', 'car', 'cat', 'chair', 'cow', 'diningtable',
+           'dog', 'horse', 'motorbike', 'person', 'pottedplant',
+           'sheep', 'sofa', 'train', 'tvmonitor']
+# Set the image size.
+IMG_HEIGHT = 300
+IMG_WIDTH = 300
 
 def __download_model():
     gdd.download_file_from_google_drive(file_id='19FH-pBzYPCbPi7jxRJSB-Y9YIwAYGOE1',
@@ -20,41 +35,17 @@ def __download_model():
                                     showsize=True,
                                     overwrite=False)
 
-classes = ['background', 'aeroplane', 'bicycle', 'bird', 'boat',
-           'bottle', 'bus', 'car', 'cat', 'chair', 'cow', 'diningtable', 
-           'dog', 'horse', 'motorbike', 'person', 'pottedplant', 
-           'sheep', 'sofa', 'train', 'tvmonitor']
-# Set the image size.
-img_height = 300
-img_width = 300
-
-from keras.preprocessing import image
-from keras.optimizers import Adam
-from imageio import imread
-import numpy as np
-from matplotlib import pyplot as plt
-
-import os,sys,glob,ntpath
-from keras import backend as K
-import pandas as pd
-from random import shuffle
-
-from tqdm import tqdm
-from matplotlib.patches import Rectangle
-from sklearn.cluster import DBSCAN
-from scipy.spatial import ConvexHull
-
-from models.keras_ssd300 import ssd_300
-from keras_loss_function.keras_ssd_loss import SSDLoss
 
 def get_model(p_size,mc_dropout=True):
+    """ MC dropouts comaptible SSD300 model load method """
+    __download_model()
     K.clear_session() # Clear previous models from memory.
 
-    model = ssd_300(image_size=(img_height, img_width, 3),
+    model = ssd_300(image_size=(IMG_HEIGHT, IMG_WIDTH, 3),
                     n_classes=20,
                     mode='inference',
                     l2_regularization=0.0005,
-                    scales=[0.1, 0.2, 0.37, 0.54, 0.71, 0.88, 1.05], # The scales for MS COCO are [0.07, 0.15, 0.33, 0.51, 0.69, 0.87, 1.05]
+                    scales=[0.1, 0.2, 0.37, 0.54, 0.71, 0.88, 1.05],
                     aspect_ratios_per_layer=[[1.0, 2.0, 0.5],
                                              [1.0, 2.0, 0.5, 3.0, 1.0/3.0],
                                              [1.0, 2.0, 0.5, 3.0, 1.0/3.0],
@@ -75,7 +66,7 @@ def get_model(p_size,mc_dropout=True):
                     nms_max_output_size=400,
                     mc_dropout=mc_dropout,
                     dropout_size=p_size)
-    
+
     # 2: Load the trained weights into the model.
     model.load_weights(WEIGHT_PATH, by_name=True)
     # 3: Compile the model so that Keras won't complain the next time you load it.
@@ -85,6 +76,4 @@ def get_model(p_size,mc_dropout=True):
     return model
 
 if __name__ == "__main__":
-    fname = __download_model()
-    print(fname)
     tmp_model = get_model(0.2)
