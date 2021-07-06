@@ -25,4 +25,4 @@ Object detection in autonomous vehicles is commonly based on camera images and L
 * Shaukat Ali https://www.simula.no/people/shaukat
 
 ## Paper
-F.O. Catak, T. Yue and S. Ali. Prediction Surface Uncertainty Quantification in Object Detection Models for Autonomous Driving. 2021 IEEE International Conference On Artificial Intelligence Testing (AITest), 2021.
+F.O. Catak, T. Yue and S. Ali. Prediction Surface Uncertainty Quantification in Object Detection Models for Autonomous Driving. *2021 IEEE International Conference On Artificial Intelligence Testing (AITest)*, 2021.
