@@ -8,7 +8,7 @@ Object detection in autonomous vehicles is commonly based on camera images and L
 
 ## Tool
 * In order to quantify the object prediction uncertainties, a user can import the *PURE* library 
-   ```
+   ```python
    import util
    # Dropout layers are activated with p=0.3
    mc_dropout_model = util.get_model(0.3, mc_dropout=True) 
