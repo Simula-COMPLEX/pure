@@ -7,6 +7,6 @@ Object detection in autonomous vehicles is commonly based on camera images and L
 ![Process](https://raw.githubusercontent.com/Simula-COMPLEX/pure/main/desc_images/system-overview.png)
 
 ## People
-* Ferhat Ozgur Catak http://www.ozgurcatak.org
+* Ferhat Ozgur Catak https://www.simula.no/people/ozgur
 * Tao Yue https://www.simula.no/people/tao
 * Shaukat Ali https://www.simula.no/people/shaukat
