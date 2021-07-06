@@ -148,7 +148,6 @@ def get_pred_uncertainty(fname, model, T=20,
     if plot_ground_truth:        
         data = plt.imread(fname)
         fig, ax = plt.subplots(1,1,sharey=True, figsize=(12,5))
-        plt.rcParams['figure.dpi'] = 50
         ax.imshow(data)
         for i in range(mc_locations.shape[0]):
             x1, y1, x2, y2 = mc_locations[i,0:4]
