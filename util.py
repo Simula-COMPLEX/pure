@@ -7,6 +7,9 @@ Created on Sun Jul  4 19:56:47 2021
 """
 import os
 import sys
+ROOT_DIR = os.path.abspath("ssd_keras")
+sys.path.append(ROOT_DIR)  # To find local version of the library
+
 from google_drive_downloader import GoogleDriveDownloader as gdd
 
 from keras.optimizers import Adam
@@ -23,9 +26,6 @@ from matplotlib import pyplot as plt
 
 from models.keras_ssd300 import ssd_300 # pylint: disable=import-error
 from keras_loss_function.keras_ssd_loss import SSDLoss # pylint: disable=import-error
-
-ROOT_DIR = os.path.abspath("ssd_keras")
-sys.path.append(ROOT_DIR)  # To find local version of the library
 
 WEIGHT_PATH = 'tmp_model/VGG_VOC0712_SSD_300x300_iter_120000.h5'
 
