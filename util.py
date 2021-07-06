@@ -145,7 +145,7 @@ def get_pred_uncertainty(fname, model, T=20,
                     total_cluster_surface += hull.area
                 avg_surface = total_cluster_surface/mc_locations.shape[0]
     
-    if plot_ground_truth:
+    if plot_ground_truth:        
         data = plt.imread(fname)
         fig, ax = plt.subplots(1,1,sharey=True, figsize=(12,5))
         ax.imshow(data)
@@ -163,6 +163,9 @@ def get_pred_uncertainty(fname, model, T=20,
             rect = Rectangle((x1, y1), width, height, fill=False, 
                              color='white',lw=3,ls='--')
             ax.add_patch(rect)
+        plt.axis('off')
+        fig = plt.gcf()
+        fig.set_size_inches(4.5, 2.5)
         plt.show()
     
     return mc_locations, avg_surface
