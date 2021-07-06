@@ -17,7 +17,7 @@ Object detection in autonomous vehicles is commonly based on camera images and L
                                                            mc_dropout_model,mc_dropout=True, 
                                                            T=50, plot_ground_truth=True)
    ```
-* [The example Jupyter Nptebook](https://github.com/Simula-COMPLEX/pure/blob/main/pure-object-detection-uncertainty-quantification.ipynb)
+* [The example Jupyter Notebook](https://github.com/Simula-COMPLEX/pure/blob/main/pure-object-detection-uncertainty-quantification.ipynb)
 ## People
 * Ferhat Ozgur Catak https://www.simula.no/people/ozgur
 * Tao Yue https://www.simula.no/people/tao
