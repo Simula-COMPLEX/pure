@@ -11,10 +11,11 @@ Object detection in autonomous vehicles is commonly based on camera images and L
    ```python
    import util
    # Dropout layers are activated with p=0.3
-   mc_dropout_model = util.get_model(0.3, mc_dropout=True) 
-   mc_locations, uncertainties = util.get_pred_uncertainty('images/Berkeley-BDD100K/0a0c3694-4cc8b0e3.jpg',
-                                                           mc_dropout_model,mc_dropout=True, T=50, 
-                                                           plot_ground_truth=True)
+   mc_dropout_model = util.get_model(0.3, mc_dropout=True)
+   image_path = 'images/Berkeley-BDD100K/0a0c3694-4cc8b0e3.jpg'
+   mc_locations, uncertainties = util.get_pred_uncertainty(image_path,
+                                                           mc_dropout_model,mc_dropout=True, 
+                                                           T=50, plot_ground_truth=True)
    ```
 
 ## People
