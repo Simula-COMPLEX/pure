@@ -6,6 +6,17 @@ Object detection in autonomous vehicles is commonly based on camera images and L
 ## System overview
 ![Process](https://raw.githubusercontent.com/Simula-COMPLEX/pure/main/desc_images/system-overview.png)
 
+## Tool
+* In order to quantify the object prediction uncertainties, a user can import the *PURE* library 
+   ```
+   import util
+   # Dropout layers are activated with p=0.3
+   mc_dropout_model = util.get_model(0.3, mc_dropout=True) 
+   mc_locations, uncertainties = util.get_pred_uncertainty('images/Berkeley-BDD100K/0a0c3694-4cc8b0e3.jpg',
+                                                           mc_dropout_model,mc_dropout=True, T=50, 
+                                                           plot_ground_truth=True)
+   ```
+
 ## People
 * Ferhat Ozgur Catak https://www.simula.no/people/ozgur
 * Tao Yue https://www.simula.no/people/tao
