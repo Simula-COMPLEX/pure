@@ -7,7 +7,7 @@ Object detection in autonomous vehicles is commonly based on camera images and L
 ![Process](https://raw.githubusercontent.com/Simula-COMPLEX/pure/main/desc_images/system-overview.png)
 
 ## Tool
-* In order to quantify the object prediction uncertainties, a user can use the *PURE* library's *util.py* file. Example:
+* In order to quantify the object prediction uncertainties, a user can use the *PURE* library's *util.py* file. In the following example white dashed boxes show the ground-truth boxes, red boxes show the Monte-Carlo droput based object predictions.
    ```python
    import util
    # Dropout layers are activated with p=0.3
