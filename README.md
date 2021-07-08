@@ -34,16 +34,15 @@ Object detection in autonomous vehicles is commonly based on camera images and L
 The output table:
 
 |     Metric     |  Value   |
-|----------------|----------|
+|----------------|---------:|
 |    Avg. IoU    |  0.9548  |
-|       TP       |    9     |
-|   Precision    |   0.45   |
-|     Recall     |   0.9    |
-|       F1       |   0.6    |
+|       TP       |  9,0000  |
+|   Precision    |   0.4500 |
+|     Recall     |   0.9000 |
+|       F1       |   0.6000 |
 |  Uncertainty   | 197.0125 |
-| Total detected |    20    |
-| Total objects  |    10    |
-|----------------|----------|
+| Total detected | 20.0000  |
+| Total objects  | 10.0000  |
 
 ## People
 * Ferhat Ozgur Catak https://www.simula.no/people/ozgur
