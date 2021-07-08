@@ -23,7 +23,7 @@ Object detection in autonomous vehicles is commonly based on camera images and L
 ## Research Questions
 ### RQ1
 
-    ```python
+   ```python
     import util
     image_path = 'images/Stanford/'
     image_type = 'jpg'
