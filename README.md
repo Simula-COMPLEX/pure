@@ -7,7 +7,7 @@ Object detection in autonomous vehicles is commonly based on camera images and L
 ![Process](https://raw.githubusercontent.com/Simula-COMPLEX/pure/main/desc_images/system-overview.png)
 
 ## Tool
-First step is to install the dependencies using *requirements.txt* file
+* First step is to install the dependencies using *requirements.txt* file
    ```bash
    pip install -r requirements.txt 
    ```
