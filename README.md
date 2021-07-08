@@ -42,7 +42,7 @@ The output table:
 |     Metric     |  Value   |
 |----------------|---------:|
 |    Avg. IoU    |  0.9548  |
-|       TP       |  9,0000  |
+|       TP       |  9.0000  |
 |   Precision    |   0.4500 |
 |     Recall     |   0.9000 |
 |       F1       |   0.6000 |
