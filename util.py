@@ -12,6 +12,9 @@ from google_drive_downloader import GoogleDriveDownloader as gdd
 from scipy import stats
 from glob import glob
 from tqdm import tqdm
+import seaborn as sns
+import warnings
+warnings.filterwarnings("ignore")
 
 from keras.optimizers import Adam
 from keras import backend as K
@@ -42,6 +45,7 @@ classes = ['background', 'aeroplane', 'bicycle', 'bird', 'boat',
 IMG_HEIGHT = 300
 IMG_WIDTH = 300
 COLOR_CODES = itertools.cycle(('r','g','b','c','m','y','k'))
+c = (255/255., 127/255., 14/255.)
 
 def __download_model():
     gdd.download_file_from_google_drive(file_id='19FH-pBzYPCbPi7jxRJSB-Y9YIwAYGOE1',
@@ -197,13 +201,7 @@ def get_evaluation_result(model, image_path, image_type, T=20,
     recall = total_true_detected/total_objects
     f1 = stats.hmean([precision, recall] )
     uncertainty = np.sum(df_result.uncertainty.values) / total_detected
-    print('Avg IoU:',avg_iou)
-    print ('TP:',TP)
-    print('All Detections:',total_detected)
-    print('Precision:',precision)
-    print('GT',total_objects)
-    print('Recall:',recall)
-    print('F_1', f1)
+
     return avg_iou, TP,precision,recall,f1, uncertainty,total_detected,total_objects
 
 def get_model(p_size,mc_dropout=True):
@@ -331,11 +329,23 @@ def get_pred_uncertainty(fname, model, T=20,
 
     return mc_locations, avg_surface
 
+def plot_area_unc_vs_area(experiment_file):
+    
+    col_names = ['uncertainty','iou']
+    df = pd.read_csv(experiment_file, delimiter='\t',names=col_names)
+    h = sns.jointplot(x='uncertainty',y='iou', data=df, kind='reg',
+               scatter_kws={'alpha':0.75,'color':c},
+               marginal_kws=dict(bins=4),)
+    h.ax_joint.set_xlabel('Uncertainty')
+    h.ax_joint.set_ylabel('IoU')
+    plt.show()
+
 if __name__ == "__main__":
     fname = 'images/Stanford/00002.jpg'
     image_path = 'images/Stanford/'
     image_type = 'jpg'
     tmp_model = get_model(0.05)
+    '''
     get_pred_uncertainty(fname,tmp_model, T=10,
                          plot_ground_truth=True)
     avg_iou, TP,precision,recall,f1, uncertainty,total_detected,total_objects = get_evaluation_result(tmp_model, image_path,image_type)
@@ -349,4 +359,21 @@ if __name__ == "__main__":
     t.add_row(['Total detected',total_detected])
     t.add_row(['Total objects',total_objects])
     print(t)
+    '''
+    
+    experiment_file = 'experiments_results_for_rq2.csv'
+    
+    plot_area_unc_vs_area(experiment_file)
+    
+    f_out = open(experiment_file,'a')
+    for _ in tqdm(range(10000), 'Overall experiments'):
+        avg_iou, TP,precision,recall,f1, uncertainty,total_detected,total_objects = get_evaluation_result(tmp_model, 
+                                                                                                          image_path,
+                                                                                                          image_type,
+                                                                                                          T=50)
+        
+        f_out.write(str(uncertainty) + '\t' + str(avg_iou) + '\n')
+    f_out.close()
+    plot_area_unc_vs_area(f_out)
+    
     
