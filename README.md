@@ -27,6 +27,7 @@ Object detection in autonomous vehicles is commonly based on camera images and L
 
 ## Research Questions
 ### RQ1
+Is the prediction surface an effective uncertainty quantification method for object detection predictions? This RQ assesses the effectiveness of PURE. *get_evaluation_result* method can show the prediction performance and the uncertainty quantification values of a given folder containing images and corresponding ground-truth information.
 
    ```python
     import util
