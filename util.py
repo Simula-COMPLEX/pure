@@ -7,8 +7,6 @@ Created on Sun Jul  4 19:56:47 2021
 """
 import os
 import sys
-ROOT_DIR = os.path.abspath("ssd_keras")
-sys.path.append(ROOT_DIR)  # To find local version of the library
 
 from google_drive_downloader import GoogleDriveDownloader as gdd
 from scipy import stats
@@ -26,9 +24,11 @@ from matplotlib.patches import Rectangle
 from sklearn.cluster import DBSCAN
 from scipy.spatial import ConvexHull
 from matplotlib import pyplot as plt
-import ml_metrics 
+import ml_metrics
 from prettytable import PrettyTable
 
+ROOT_DIR = os.path.abspath("ssd_keras")
+sys.path.append(ROOT_DIR)  # To find local version of the library
 from models.keras_ssd300 import ssd_300 # pylint: disable=import-error
 from keras_loss_function.keras_ssd_loss import SSDLoss # pylint: disable=import-error
 
@@ -78,21 +78,21 @@ def get_evaluation_result(model, image_path, image_type, T=20,
                           mc_dropout=True):
     iou_threshold = 0.5
     total_hull = 0.0
-    
-    search_path = image_path +  '*.' + image_type 
+
+    search_path = image_path +  '*.' + image_type
     files = glob(search_path)
-    
+
     f_result_path = 'model_pred_res_no_mc.csv'
     f_out = open(f_result_path,'w')
-    
+
     for i in tqdm(range(len(files))):
         fname = files[i]
         ground_truth_file = fname + '.txt'
         ground_truth = pd.read_csv(ground_truth_file,
                                        names=['class','x1','y1','x2','y2'],
                                        sep=' ')
-        
-        mc_locations, uncertainties = get_pred_uncertainty(fname=fname, model=model, 
+
+        mc_locations, uncertainties = get_pred_uncertainty(fname=fname, model=model,
                                                            T=T, plot_ground_truth=plot_ground_truth,
                                                            mc_dropout=mc_dropout)
         max_iou_val_list = []
@@ -100,7 +100,7 @@ def get_evaluation_result(model, image_path, image_type, T=20,
         avg_hull = 0.0
         if mc_locations.shape[0]:
             num_of_detected = 0.0
-            mc_locations_df = pd.DataFrame(data=mc_locations, 
+            mc_locations_df = pd.DataFrame(data=mc_locations,
                                            columns=['x1','y1','x2','y2','center_x',
                                                     'center_y','label'])
             mc_locations_df['label'] = pd.to_numeric(mc_locations_df['label'], downcast='integer')
@@ -117,7 +117,7 @@ def get_evaluation_result(model, image_path, image_type, T=20,
                 x2_avg = np.max([avg_locations[0],avg_locations[2]])
                 y1_avg = np.min([avg_locations[1],avg_locations[3]])
                 y2_avg = np.max([avg_locations[1],avg_locations[3]])
-                
+
                 max_mAP = 0.0
                 max_iou_val = 0.0
                 for index, row in ground_truth.iterrows():
@@ -125,73 +125,73 @@ def get_evaluation_result(model, image_path, image_type, T=20,
                     x2 = np.max([row['x1'],row['x2']])
                     y1 = np.min([row['y1'],row['y2']])
                     y2 = np.max([row['y1'],row['y2']])
-                    
+
                     iou_val = get_iou([x1_avg,y1_avg,x2_avg,y2_avg],[x1,y1,x2,y2])
-                    
+
                     map_list_pred = []
                     map_list_gt = []
                     map_list_pred.append([x1_avg,y1_avg,x2_avg,y2_avg])
                     map_list_gt.append([x1,y1,x2,y2])
                     obj_map = ml_metrics.mapk(map_list_gt, map_list_pred)
                     max_mAP = np.max([max_mAP,obj_map])
-                    
-                    max_iou_val = np.max([max_iou_val, iou_val]) 
-                
+
+                    max_iou_val = np.max([max_iou_val, iou_val])
+
                 max_iou_val_list.append(max_iou_val)
                 max_mAP_val_list.append(max_mAP)
-                
+
                 mc_locations_obj = tmp_df.values
                 if mc_locations_obj.shape[0] > 3:
                     tmp_hull_area = 0.0
                     points = mc_locations_obj[:,0:2]
                     hull1 = ConvexHull(points)
                     tmp_hull_area += hull1.area
-                    
+
                     points = mc_locations_obj[:,2:4]
                     hull1 = ConvexHull(points)
                     tmp_hull_area += hull1.area
-                        
+
                     points = np.c_[mc_locations_obj[:,0],mc_locations_obj[:,3]]
                     hull1 = ConvexHull(points)
                     tmp_hull_area += hull1.area
-                        
+
                     points = np.c_[mc_locations_obj[:,2],mc_locations_obj[:,1]]
                     hull1 = ConvexHull(points)
                     tmp_hull_area += hull1.area
-    
-                    if tmp_hull_area <= 150000: 
+
+                    if tmp_hull_area <= 150000:
                         total_hull += tmp_hull_area
                         num_of_detected += 1.0
-    
+
             avg_hull = total_hull / len(cluster_labels)
             avg_hull = total_hull / (num_of_detected + 1e-20)
-            
+
             max_iou_val_list = np.array(max_iou_val_list)
             detected = (max_iou_val_list >= iou_threshold)
             num_of_detected = max_iou_val_list[detected]
-            
-            f_out.write(str(ground_truth.shape[0]) 
-                        + '\t' + str(num_of_detected.shape[0]) + '\t' 
-                        + str(max_iou_val_list.shape[0]) + '\t' 
-                        + str(max_iou_val_list).replace('\n',' ') 
+
+            f_out.write(str(ground_truth.shape[0])
+                        + '\t' + str(num_of_detected.shape[0]) + '\t'
+                        + str(max_iou_val_list.shape[0]) + '\t'
+                        + str(max_iou_val_list).replace('\n',' ')
                         + '\t' + str(avg_hull) + '\n')
-    
+
     f_out.close()
-    
+
     df_result = pd.read_csv(f_result_path,names=['gt_obj','true_detected',
                                                  'detected','iou_preds',
                                                  'uncertainty'], sep='\t' )
     total_objects = np.sum(df_result.gt_obj.values)
     total_true_detected = np.sum(df_result.true_detected.values)
     total_detected = np.sum(df_result.detected.values)
-    
+
     uio_vals = [np.fromstring(v.replace('[','').replace(']',''), sep=' ').mean() for v in df_result.iou_preds.values]
     uio_vals = np.array(uio_vals)
     uio_vals[np.isnan(uio_vals)] = 0
-    
+
     avg_iou = uio_vals.mean()
     avg_iou = uio_vals[(uio_vals >= iou_threshold)].mean()
-    
+
     TP = total_true_detected
     precision = total_true_detected/total_detected
     recall = total_true_detected/total_objects
@@ -245,29 +245,29 @@ def get_model(p_size,mc_dropout=True):
     model.compile(optimizer=adam, loss=ssd_loss.compute_loss)
     return model
 
-def get_pred_uncertainty(fname, model, T=20, 
+def get_pred_uncertainty(fname, model, T=20,
                          plot_ground_truth=False, mc_dropout=True):
     ground_truth_file = fname + '.txt'
     ground_truth = pd.read_csv(ground_truth_file,
                                names=['class','x1','y1','x2','y2'],
                                sep=' ')
-    
+
     orig_images = [] # Store the images here.
     input_images = [] # Store resized versions of the images here.
 
     orig_images.append(imread(fname))
     img = image.load_img(fname, target_size=(IMG_HEIGHT, IMG_WIDTH))
-    img = image.img_to_array(img) 
+    img = image.img_to_array(img)
     input_images.append(img)
     input_images = np.array(input_images)
-    
+
     mc_locations = []
 
     for _ in range(T):
         y_pred = model.predict(input_images)
         confidence_threshold = 0.5
         y_pred_thresh = [y_pred[k][y_pred[k,:,1] > confidence_threshold] for k in range(y_pred.shape[0])]
-        
+
         for box in y_pred_thresh[0]:
             x1 = box[2] * orig_images[0].shape[1] / IMG_WIDTH
             y1 = box[3] * orig_images[0].shape[0] / IMG_HEIGHT
@@ -275,13 +275,13 @@ def get_pred_uncertainty(fname, model, T=20,
             y2 = box[5] * orig_images[0].shape[0] / IMG_HEIGHT
             width, height = x2 - x1, y2 - y1
             mc_locations.append(np.array([x1,y1,x2,y2,x1+width/2,y1+height/2]))
-            
+
     mc_locations = np.array(mc_locations)
     avg_surface = -1.0
     if mc_locations.shape[0]:
         clustering = DBSCAN(eps=100, min_samples=2).fit(mc_locations)
         mc_locations = np.c_[mc_locations,clustering.labels_.ravel()]
-        
+
         mc_locations_df = pd.DataFrame(data=mc_locations, columns=['x1','y1','x2','y2','center_x','center_y','label'])
         cluster_labels = np.unique(mc_locations[:,6])
         total_cluster_surface = 0.0
@@ -292,21 +292,21 @@ def get_pred_uncertainty(fname, model, T=20,
                     center_data = cluster_df[['x1','y1']].values
                     hull = ConvexHull(center_data)
                     total_cluster_surface += hull.area
-                    
+
                     center_data = cluster_df[['x2','y1']].values
                     hull = ConvexHull(center_data)
                     total_cluster_surface += hull.area
-                    
+
                     center_data = cluster_df[['x1','y2']].values
                     hull = ConvexHull(center_data)
                     total_cluster_surface += hull.area
-                    
+
                     center_data = cluster_df[['x2','y2']].values
                     hull = ConvexHull(center_data)
                     total_cluster_surface += hull.area
                 avg_surface = total_cluster_surface/mc_locations.shape[0]
-    
-    if plot_ground_truth:        
+
+    if plot_ground_truth:
         data = plt.imread(fname)
         fig, ax = plt.subplots(1,1,sharey=True, figsize=(12,5))
         ax.imshow(data)
@@ -317,18 +317,18 @@ def get_pred_uncertainty(fname, model, T=20,
             ax.add_patch(rect)
             ax.scatter(mc_locations[i,4],mc_locations[i,5], marker='x',
                        c='g',s=150)
-            
+
         for index, row in ground_truth.iterrows():
             x1, y1, x2, y2 = row['x1'], row['y1'], row['x2'],row['y2']
             width, height = x2 - x1, y2 - y1
-            rect = Rectangle((x1, y1), width, height, fill=False, 
+            rect = Rectangle((x1, y1), width, height, fill=False,
                              color='white',lw=3,ls='--')
             ax.add_patch(rect)
         plt.axis('off')
         fig = plt.gcf()
         fig.set_size_inches(4.5, 2.5)
         plt.show()
-    
+
     return mc_locations, avg_surface
 
 if __name__ == "__main__":
@@ -336,7 +336,7 @@ if __name__ == "__main__":
     image_path = 'images/Stanford/'
     image_type = 'jpg'
     tmp_model = get_model(0.05)
-    get_pred_uncertainty(fname,tmp_model, T=10, 
+    get_pred_uncertainty(fname,tmp_model, T=10,
                          plot_ground_truth=True)
     avg_iou, TP,precision,recall,f1, uncertainty,total_detected,total_objects = get_evaluation_result(tmp_model, image_path,image_type)
     t = PrettyTable(['Metric', 'Value'])
