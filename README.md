@@ -31,6 +31,19 @@ Object detection in autonomous vehicles is commonly based on camera images and L
     mc_dropout_model = util.get_model(0.3, mc_dropout=True)
     avg_iou, TP,precision,recall,f1, uncertainty,total_detected,total_objects = get_evaluation_result(tmp_model, image_path,image_type)
    ```
+The output table:
++----------------+----------+
+|     Metric     |  Value   |
++----------------+----------+
+|    Avg. IoU    |  0.9548  |
+|       TP       |    9     |
+|   Precision    |   0.45   |
+|     Recall     |   0.9    |
+|       F1       |   0.6    |
+|  Uncertainty   | 197.0125 |
+| Total detected |    20    |
+| Total objects  |    10    |
++----------------+----------+
 ## People
 * Ferhat Ozgur Catak https://www.simula.no/people/ozgur
 * Tao Yue https://www.simula.no/people/tao
