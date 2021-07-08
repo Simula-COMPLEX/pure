@@ -11,6 +11,9 @@ ROOT_DIR = os.path.abspath("ssd_keras")
 sys.path.append(ROOT_DIR)  # To find local version of the library
 
 from google_drive_downloader import GoogleDriveDownloader as gdd
+from scipy import stats
+from glob import glob
+from tqdm import tqdm
 
 from keras.optimizers import Adam
 from keras import backend as K
@@ -23,6 +26,8 @@ from matplotlib.patches import Rectangle
 from sklearn.cluster import DBSCAN
 from scipy.spatial import ConvexHull
 from matplotlib import pyplot as plt
+import ml_metrics 
+from prettytable import PrettyTable
 
 from models.keras_ssd300 import ssd_300 # pylint: disable=import-error
 from keras_loss_function.keras_ssd_loss import SSDLoss # pylint: disable=import-error
@@ -44,6 +49,162 @@ def __download_model():
                                     showsize=True,
                                     overwrite=False)
 
+def get_iou(boxA, boxB):
+    # determine the (x, y)-coordinates of the intersection rectangle
+    xA = max(boxA[0], boxB[0])
+    yA = max(boxA[1], boxB[1])
+    xB = min(boxA[2], boxB[2])
+    yB = min(boxA[3], boxB[3])
+
+    # compute the area of intersection rectangle
+    interArea = abs(max((xB - xA, 0)) * max((yB - yA), 0))
+    if interArea == 0:
+        return 0
+    # compute the area of both the prediction and ground-truth
+    # rectangles
+    boxAArea = abs((boxA[2] - boxA[0]) * (boxA[3] - boxA[1]))
+    boxBArea = abs((boxB[2] - boxB[0]) * (boxB[3] - boxB[1]))
+
+    # compute the intersection over union by taking the intersection
+    # area and dividing it by the sum of prediction + ground-truth
+    # areas - the interesection area
+    iou = interArea / float(boxAArea + boxBArea - interArea)
+
+    # return the intersection over union value
+    return iou
+
+def get_evaluation_result(model, image_path, image_type, T=20,
+                          plot_ground_truth=False,
+                          mc_dropout=True):
+    iou_threshold = 0.5
+    total_hull = 0.0
+    
+    search_path = image_path +  '*.' + image_type 
+    files = glob(search_path)
+    
+    f_result_path = 'model_pred_res_no_mc.csv'
+    f_out = open(f_result_path,'w')
+    
+    for i in tqdm(range(len(files))):
+        fname = files[i]
+        ground_truth_file = fname + '.txt'
+        ground_truth = pd.read_csv(ground_truth_file,
+                                       names=['class','x1','y1','x2','y2'],
+                                       sep=' ')
+        
+        mc_locations, uncertainties = get_pred_uncertainty(fname=fname, model=model, 
+                                                           T=T, plot_ground_truth=plot_ground_truth,
+                                                           mc_dropout=mc_dropout)
+        max_iou_val_list = []
+        max_mAP_val_list = []
+        avg_hull = 0.0
+        if mc_locations.shape[0]:
+            num_of_detected = 0.0
+            mc_locations_df = pd.DataFrame(data=mc_locations, 
+                                           columns=['x1','y1','x2','y2','center_x',
+                                                    'center_y','label'])
+            mc_locations_df['label'] = pd.to_numeric(mc_locations_df['label'], downcast='integer')
+            cluster_labels = np.unique(mc_locations_df.label.values)
+            total_hull = 0.0
+            for c_label in cluster_labels:
+                if c_label == -1.0:
+                    continue
+                tmp_df = mc_locations_df.query('label == ' + str(c_label))
+                tmp_df.drop(['label'], axis=1, inplace=True)
+                avg_locations = tmp_df.values.mean(axis=0)
+                x1_avg,y1_avg,x2_avg,y2_avg = avg_locations[0:4]
+                x1_avg = np.min([avg_locations[0],avg_locations[2]])
+                x2_avg = np.max([avg_locations[0],avg_locations[2]])
+                y1_avg = np.min([avg_locations[1],avg_locations[3]])
+                y2_avg = np.max([avg_locations[1],avg_locations[3]])
+                
+                max_mAP = 0.0
+                max_iou_val = 0.0
+                for index, row in ground_truth.iterrows():
+                    x1 = np.min([row['x1'],row['x2']])
+                    x2 = np.max([row['x1'],row['x2']])
+                    y1 = np.min([row['y1'],row['y2']])
+                    y2 = np.max([row['y1'],row['y2']])
+                    
+                    iou_val = get_iou([x1_avg,y1_avg,x2_avg,y2_avg],[x1,y1,x2,y2])
+                    
+                    map_list_pred = []
+                    map_list_gt = []
+                    map_list_pred.append([x1_avg,y1_avg,x2_avg,y2_avg])
+                    map_list_gt.append([x1,y1,x2,y2])
+                    obj_map = ml_metrics.mapk(map_list_gt, map_list_pred)
+                    max_mAP = np.max([max_mAP,obj_map])
+                    
+                    max_iou_val = np.max([max_iou_val, iou_val]) 
+                
+                max_iou_val_list.append(max_iou_val)
+                max_mAP_val_list.append(max_mAP)
+                
+                mc_locations_obj = tmp_df.values
+                if mc_locations_obj.shape[0] > 3:
+                    tmp_hull_area = 0.0
+                    points = mc_locations_obj[:,0:2]
+                    hull1 = ConvexHull(points)
+                    tmp_hull_area += hull1.area
+                    
+                    points = mc_locations_obj[:,2:4]
+                    hull1 = ConvexHull(points)
+                    tmp_hull_area += hull1.area
+                        
+                    points = np.c_[mc_locations_obj[:,0],mc_locations_obj[:,3]]
+                    hull1 = ConvexHull(points)
+                    tmp_hull_area += hull1.area
+                        
+                    points = np.c_[mc_locations_obj[:,2],mc_locations_obj[:,1]]
+                    hull1 = ConvexHull(points)
+                    tmp_hull_area += hull1.area
+    
+                    if tmp_hull_area <= 150000: 
+                        total_hull += tmp_hull_area
+                        num_of_detected += 1.0
+    
+            avg_hull = total_hull / len(cluster_labels)
+            avg_hull = total_hull / (num_of_detected + 1e-20)
+            
+            max_iou_val_list = np.array(max_iou_val_list)
+            detected = (max_iou_val_list >= iou_threshold)
+            num_of_detected = max_iou_val_list[detected]
+            
+            f_out.write(str(ground_truth.shape[0]) 
+                        + '\t' + str(num_of_detected.shape[0]) + '\t' 
+                        + str(max_iou_val_list.shape[0]) + '\t' 
+                        + str(max_iou_val_list).replace('\n',' ') 
+                        + '\t' + str(avg_hull) + '\n')
+    
+    f_out.close()
+    
+    df_result = pd.read_csv(f_result_path,names=['gt_obj','true_detected',
+                                                 'detected','iou_preds',
+                                                 'uncertainty'], sep='\t' )
+    total_objects = np.sum(df_result.gt_obj.values)
+    total_true_detected = np.sum(df_result.true_detected.values)
+    total_detected = np.sum(df_result.detected.values)
+    
+    uio_vals = [np.fromstring(v.replace('[','').replace(']',''), sep=' ').mean() for v in df_result.iou_preds.values]
+    uio_vals = np.array(uio_vals)
+    uio_vals[np.isnan(uio_vals)] = 0
+    
+    avg_iou = uio_vals.mean()
+    avg_iou = uio_vals[(uio_vals >= iou_threshold)].mean()
+    
+    TP = total_true_detected
+    precision = total_true_detected/total_detected
+    recall = total_true_detected/total_objects
+    f1 = stats.hmean([precision, recall] )
+    uncertainty = np.sum(df_result.uncertainty.values) / total_detected
+    print('Avg IoU:',avg_iou)
+    print ('TP:',TP)
+    print('All Detections:',total_detected)
+    print('Precision:',precision)
+    print('GT',total_objects)
+    print('Recall:',recall)
+    print('F_1', f1)
+    return avg_iou, TP,precision,recall,f1, uncertainty,total_detected,total_objects
 
 def get_model(p_size,mc_dropout=True):
     """ MC dropouts comaptible SSD300 model load method """
@@ -171,6 +332,21 @@ def get_pred_uncertainty(fname, model, T=20,
     return mc_locations, avg_surface
 
 if __name__ == "__main__":
+    fname = 'images/Stanford/00002.jpg'
+    image_path = 'images/Stanford/'
+    image_type = 'jpg'
     tmp_model = get_model(0.05)
-    get_pred_uncertainty('images/Stanford/00002.jpg',tmp_model, T=10, 
+    get_pred_uncertainty(fname,tmp_model, T=10, 
                          plot_ground_truth=True)
+    avg_iou, TP,precision,recall,f1, uncertainty,total_detected,total_objects = get_evaluation_result(tmp_model, image_path,image_type)
+    t = PrettyTable(['Metric', 'Value'])
+    t.add_row(['Avg. IoU', avg_iou])
+    t.add_row(['TP', TP])
+    t.add_row(['Precision',precision])
+    t.add_row(['Recall',recall])
+    t.add_row(['F1',f1])
+    t.add_row(['Uncertainty',uncertainty])
+    t.add_row(['Total detected',total_detected])
+    t.add_row(['Total objects',total_objects])
+    print(t)
+    

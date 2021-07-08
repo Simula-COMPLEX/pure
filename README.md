@@ -19,6 +19,20 @@ Object detection in autonomous vehicles is commonly based on camera images and L
    ```
    ![Output](https://raw.githubusercontent.com/Simula-COMPLEX/pure/main/desc_images/berkeley1.png)
 * [The example Jupyter Notebook](https://github.com/Simula-COMPLEX/pure/blob/main/pure-object-detection-uncertainty-quantification.ipynb)
+
+## Research Questions
+### RQ1
+
+    ```python
+   import util
+   
+   image_path = 'images/Stanford/'
+   image_type = 'jpg'
+    
+   # Dropout layers are activated with p=0.3
+   mc_dropout_model = util.get_model(0.3, mc_dropout=True)
+   avg_iou, TP,precision,recall,f1, uncertainty,total_detected,total_objects = get_evaluation_result(tmp_model, image_path,image_type)
+   ```
 ## People
 * Ferhat Ozgur Catak https://www.simula.no/people/ozgur
 * Tao Yue https://www.simula.no/people/tao
