@@ -377,6 +377,6 @@ if __name__ == "__main__":
         
         f_out.write(str(uncertainty) + '\t' + str(avg_iou) + '\n')
     f_out.close()
-    plot_area_unc_vs_area(f_out)
+    plot_area_unc_vs_area(experiment_file)
     
     

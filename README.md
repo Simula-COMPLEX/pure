@@ -74,7 +74,7 @@ This RQ tests the hypothesis that the prediction performance of a DNN model decr
         
         f_out.write(str(uncertainty) + '\t' + str(avg_iou) + '\n')
     f_out.close()
-    util.plot_area_unc_vs_area(f_out)
+    util.plot_area_unc_vs_area(experiment_file)
    ```
 ![Output](https://raw.githubusercontent.com/Simula-COMPLEX/pure/main/desc_images/rq2.png)
 
