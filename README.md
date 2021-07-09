@@ -63,7 +63,7 @@ The output table:
     f_out = open(experiment_file,'a')
 
     # Conduct 1000 experiments
-    for _ in tqdm(range(10000), 'Overall experiments'):
+    for _ in tqdm(range(1000), 'Overall experiments'):
         avg_iou, TP,precision,recall,f1, \
             uncertainty,total_detected,\
                 total_objects = get_evaluation_result(tmp_model,
@@ -75,6 +75,8 @@ The output table:
     f_out.close()
     plot_area_unc_vs_area(f_out)
    ```
+![Output](https://raw.githubusercontent.com/Simula-COMPLEX/pure/main/desc_images/rq2.png)
+
 ## People
 * Ferhat Ozgur Catak https://www.simula.no/people/ozgur
 * Tao Yue https://www.simula.no/people/tao
