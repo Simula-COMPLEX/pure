@@ -26,7 +26,7 @@ Object detection in autonomous vehicles is commonly based on camera images and L
 * [The example Jupyter Notebook](https://github.com/Simula-COMPLEX/pure/blob/main/pure-object-detection-uncertainty-quantification.ipynb)
 
 ## Research Questions
-### RQ1 Is the prediction surface an effective uncertainty quantification method for object detection predictions? 
+### RQ1: Is the prediction surface an effective uncertainty quantification method for object detection predictions? 
 This RQ assesses the effectiveness of PURE. *get_evaluation_result* method can show the prediction performance and the uncertainty quantification values of a given folder containing images and corresponding ground-truth information.
 
    ```python
@@ -50,7 +50,7 @@ The output table:
 | Total detected | 20.0000  |
 | Total objects  | 10.0000  |
 
-### RQ2 Is there any correlation between prediction surface uncertainty and the object detection performance of DNN models? 
+### RQ2: Is there any correlation between prediction surface uncertainty and the object detection performance of DNN models? 
 This RQ tests the hypothesis that the prediction performance of a DNN model decreases with the increase in the uncertainty in images used for object detection. 
 
    ```python
