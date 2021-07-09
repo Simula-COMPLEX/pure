@@ -66,14 +66,14 @@ The output table:
     for _ in tqdm(range(1000), 'Overall experiments'):
         avg_iou, TP,precision,recall,f1, \
             uncertainty,total_detected,\
-                total_objects = get_evaluation_result(tmp_model,
-                                                      image_path,
-                                                      image_type,
-                                                      T=30)
+                total_objects = util.get_evaluation_result(tmp_model,
+                                                           image_path,
+                                                           image_type,
+                                                           T=30)
         
         f_out.write(str(uncertainty) + '\t' + str(avg_iou) + '\n')
     f_out.close()
-    plot_area_unc_vs_area(f_out)
+    util.plot_area_unc_vs_area(f_out)
    ```
 ![Output](https://raw.githubusercontent.com/Simula-COMPLEX/pure/main/desc_images/rq2.png)
 
