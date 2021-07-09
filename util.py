@@ -99,6 +99,7 @@ def get_evaluation_result(model, image_path, image_type, T=20,
         mc_locations, uncertainties = get_pred_uncertainty(fname=fname, model=model,
                                                            T=T, plot_ground_truth=plot_ground_truth,
                                                            mc_dropout=mc_dropout)
+
         max_iou_val_list = []
         max_mAP_val_list = []
         avg_hull = 0.0
@@ -335,7 +336,7 @@ def plot_area_unc_vs_area(experiment_file):
     df = pd.read_csv(experiment_file, delimiter='\t',names=col_names)
     h = sns.jointplot(x='uncertainty',y='iou', data=df, kind='reg',
                scatter_kws={'alpha':0.75,'color':c},
-               marginal_kws=dict(bins=4),)
+               marginal_kws=dict(bins=30),)
     h.ax_joint.set_xlabel('Uncertainty')
     h.ax_joint.set_ylabel('IoU')
     plt.show()
@@ -344,7 +345,7 @@ if __name__ == "__main__":
     fname = 'images/Stanford/00002.jpg'
     image_path = 'images/Stanford/'
     image_type = 'jpg'
-    tmp_model = get_model(0.05)
+    tmp_model = get_model(0.3)
     '''
     get_pred_uncertainty(fname,tmp_model, T=10,
                          plot_ground_truth=True)
@@ -367,10 +368,12 @@ if __name__ == "__main__":
     
     f_out = open(experiment_file,'a')
     for _ in tqdm(range(10000), 'Overall experiments'):
-        avg_iou, TP,precision,recall,f1, uncertainty,total_detected,total_objects = get_evaluation_result(tmp_model, 
-                                                                                                          image_path,
-                                                                                                          image_type,
-                                                                                                          T=50)
+        avg_iou, TP,precision,recall,f1, \
+            uncertainty,total_detected,\
+                total_objects = get_evaluation_result(tmp_model,
+                                                      image_path,
+                                                      image_type,
+                                                      T=30)
         
         f_out.write(str(uncertainty) + '\t' + str(avg_iou) + '\n')
     f_out.close()

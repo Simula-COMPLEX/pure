@@ -50,6 +50,31 @@ The output table:
 | Total detected | 20.0000  |
 | Total objects  | 10.0000  |
 
+### RQ2
+
+   ```python
+    import util
+    image_path = 'images/Stanford/'
+    image_type = 'jpg'
+    # Dropout layers are activated with p=0.3
+    mc_dropout_model = util.get_model(0.3, mc_dropout=True)
+
+    experiment_file = 'experiments_results_for_rq2.csv'
+    f_out = open(experiment_file,'a')
+
+    # Conduct 1000 experiments
+    for _ in tqdm(range(10000), 'Overall experiments'):
+        avg_iou, TP,precision,recall,f1, \
+            uncertainty,total_detected,\
+                total_objects = get_evaluation_result(tmp_model,
+                                                      image_path,
+                                                      image_type,
+                                                      T=30)
+        
+        f_out.write(str(uncertainty) + '\t' + str(avg_iou) + '\n')
+    f_out.close()
+    plot_area_unc_vs_area(f_out)
+   ```
 ## People
 * Ferhat Ozgur Catak https://www.simula.no/people/ozgur
 * Tao Yue https://www.simula.no/people/tao
