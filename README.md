@@ -51,6 +51,7 @@ The output table:
 | Total objects  | 10.0000  |
 
 ### RQ2
+Is there any correlation between prediction surface uncertainty and the object detection performance of DNN models? This RQ tests the hypothesis that the prediction performance of a DNN model decreases with the increase in the uncertainty in images used for object detection. 
 
    ```python
     import util
