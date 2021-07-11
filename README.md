@@ -55,6 +55,7 @@ This RQ tests the hypothesis that the prediction performance of a DNN model decr
 
    ```python
     import util
+    from tqdm import tqdm
     image_path = 'images/Stanford/'
     image_type = 'jpg'
     # Dropout layers are activated with p=0.3
