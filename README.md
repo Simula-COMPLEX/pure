@@ -68,7 +68,7 @@ This RQ tests the hypothesis that the prediction performance of a DNN model decr
     for _ in tqdm(range(1000), 'Overall experiments'):
         avg_iou, TP,precision,recall,f1, \
             uncertainty,total_detected,\
-                total_objects = util.get_evaluation_result(tmp_model,
+                total_objects = util.get_evaluation_result(mc_dropout_model,
                                                            image_path,
                                                            image_type,
                                                            T=30)
