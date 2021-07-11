@@ -62,7 +62,7 @@ This RQ tests the hypothesis that the prediction performance of a DNN model decr
     mc_dropout_model = util.get_model(0.3, mc_dropout=True)
 
     experiment_file = 'experiments_results_for_rq2.csv'
-    f_out = open(experiment_file,'a')
+    f_out = open(experiment_file,'w')
 
     # Conduct 1000 experiments
     for _ in tqdm(range(1000), 'Overall experiments'):
