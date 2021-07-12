@@ -35,7 +35,12 @@ This RQ assesses the effectiveness of PURE. *get_evaluation_result* method can s
     image_type = 'jpg'
     # Dropout layers are activated with p=0.3
     mc_dropout_model = util.get_model(0.3, mc_dropout=True)
-    avg_iou, TP,precision,recall,f1, uncertainty,total_detected,total_objects = get_evaluation_result(tmp_model, image_path,image_type)
+    avg_iou, TP,precision,recall,f1, \
+            uncertainty,total_detected,\
+                total_objects = util.get_evaluation_result(mc_dropout_model,
+                                                           image_path,
+                                                           image_type,
+                                                           T=30)
    ```
 The output table:
 
