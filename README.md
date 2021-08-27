@@ -91,4 +91,4 @@ This RQ tests the hypothesis that the prediction performance of a DNN model decr
 
 ## Paper
 * F.O. Catak, T. Yue and S. Ali. Prediction Surface Uncertainty Quantification in Object Detection Models for Autonomous Driving. *2021 IEEE International Conference On Artificial Intelligence Testing (AITest)*, 2021.
-* ![Presentation](https://github.com/Simula-COMPLEX/pure/raw/main/PURE-AItest2021.pdf)
+* [Presentation](https://github.com/Simula-COMPLEX/pure/raw/main/PURE-AItest2021.pdf)
